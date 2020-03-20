@@ -3,15 +3,9 @@ $(function () {
     const jobSelect = '#jobSelect';
     const klassenSelect = '#klassenSelect';
 
-
-    function hideElements() {
-        $(klassenSelect).hide();
-
-    }
-
     function addListeners() {
         $(jobSelect).on('change', function () {
-
+            loadKlassenSelect();
         })
     }
 
@@ -29,10 +23,25 @@ $(function () {
             });
     }
 
-    function init() {
-        hideElements();
-        addListeners();
+    function loadKlassenSelect() {
+        $(klassenSelect).show();
+        var valueID = $("#jobSelect :selected").val();
+        $.getJSON('https://sandbox.gibm.ch/klassen.php?beruf_id=' + valueID)
+            .done(function (data) {
+                $(klassenSelect)
+                    .empty()
+                    .append('<option>Wählen Sie Ihre Klasse</option>')
+                $.each(data, function (i, klassenSelector) {
+                    $('<option value="' + klassenSelector.klasse_id + '">' + klassenSelector.klasse_longname + '</option>').appendTo($(klassenSelect));
+                })
+            });
 
+    }
+
+    function init() {
+        $(klassenSelect).hide();
+
+        addListeners();
         loadJobSelect();
     }
 
