@@ -6,11 +6,19 @@ $(function () {
     function addListeners() {
         $(jobSelect).on('change', function () {
             loadKlassenSelect();
+            setLocalstorageJobId($("#jobSelect :selected").val());
+        })
+
+        $(klassenSelect).on('change', function () {
+            setLocalstorageKlassenId($("#klassenSelect :selected").val());
         })
     }
 
     function loadJobSelect() {
         $.getJSON('https://sandbox.gibm.ch/berufe.php')
+            .fail(function () {
+                alert("Verbindung zum Server fehlgeschlagen!");
+            })
             .done(function (data) {
                 $(jobSelect)
                     .empty()
@@ -27,6 +35,9 @@ $(function () {
         $(klassenSelect).show();
         var valueID = $("#jobSelect :selected").val();
         $.getJSON('https://sandbox.gibm.ch/klassen.php?beruf_id=' + valueID)
+            .fail(function () {
+                alert("Verbindung zum Server fehlgeschlagen!");
+            })
             .done(function (data) {
                 $(klassenSelect)
                     .empty()
