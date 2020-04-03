@@ -2,8 +2,12 @@ $(function () {
 
     var jobSelect = '#jobSelect';
     var klassenSelect = '#klassenSelect';
+    var wochenDisplay = '#wochenDisplay';
+    var stundenplanContainer = '#stundenplanContainer';
     var jobIdLocalstorage = getLocalstorageJobId();
     var klassenIdLocalstorage = getLocalstorageKlassenId()
+    var datum = moment();
+    var datumWoche = moment(datum).format('WW-GGGG');
 
     function addListeners() {
         $(jobSelect).on('change', function () {
@@ -13,6 +17,7 @@ $(function () {
 
         $(klassenSelect).on('change', function () {
             setLocalstorageKlassenId($("#klassenSelect :selected").val());
+            loadTable();
         })
     }
 
@@ -39,8 +44,8 @@ $(function () {
 
     function loadKlassenSelect() {
         $(klassenSelect).show();
-        var valueID = $("#jobSelect :selected").val();
-        $.getJSON('https://sandbox.gibm.ch/klassen.php?beruf_id=' + valueID)
+        var jobID = $("#jobSelect :selected").val();
+        $.getJSON('https://sandbox.gibm.ch/klassen.php?beruf_id=' + jobID)
             .fail(function () {
                 alert("Verbindung zum Server fehlgeschlagen!");
             })
@@ -53,18 +58,67 @@ $(function () {
                 })
                 if (klassenIdLocalstorage != null) {
                     $(klassenSelect + " option[value='" + klassenIdLocalstorage + "']").attr("selected", 'true');
+                    loadTable();
                 }
             });
-
     }
 
-    function init() {
+    function loadTable() {
+        var klassenID = $("#klassenSelect :selected").val();
+        $.getJSON('http://sandbox.gibm.ch/tafel.php?klasse_id=' + klassenID + '&woche=' + datumWoche)
+            .fail(function () {
+                alert("Verbindung zum Server fehlgeschlagen!");
+            })
+            .done(function (data) {
+                $(stundenplanContainer).empty();
+                if (data.length != 0) {
+                    $(stundenplanContainer).append(
+                        '<thead><tr><th scope="col">Datum</th><th scope="col">Tag</th><th scope="col">Von</th><th scope="col">Bis</th><th scope="col">Lehrer</th><th scope="col">Fach</th><th scope="col">Raum</th></tr></thead>'
+                    );
+                    $.each(data, function (i, objectStundenplan) {
+                        console.log("uf2");
+                        $(stundenplanContainer).append(
+                            '<tr>' +
+                            '<th scope="row">' +
+                            moment(objectStundenplan.tafel_datum).format('DD.MM.YYYY') +
+                            '</th>' +
+                            '<td>' +
+                            moment(objectStundenplan.tafel_datum)
+                                .day(objectStundenplan.tafel_wochentag)
+                                .format('dddd') +
+                            '</td>' +
+                            '<td>' +
+                            moment(objectStundenplan.tafel_von, 'HH:mm:ss').format('HH:mm') +
+                            '</td>' +
+                            '<td>' +
+                            moment(objectStundenplan.tafel_bis, 'HH:mm:ss').format('HH:mm') +
+                            '</td>' +
+                            '<td>' +
+                            objectStundenplan.tafel_lehrer +
+                            '</td>' +
+                            '<td>' +
+                            objectStundenplan.tafel_longfach +
+                            '</td>' +
+                            '<td>' +
+                            objectStundenplan.tafel_raum +
+                            '</td>' +
+                            '</tr>'
+                        );
+                    });
+                }
+            });
+    }
+
+
+    function startApplication() {
         $(klassenSelect).hide();
+
+        $(wochenDisplay).text(datumWoche);
 
         addListeners();
         loadJobSelect();
 
     }
 
-    init();
+    startApplication();
 });
