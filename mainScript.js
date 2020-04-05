@@ -4,6 +4,8 @@ $(function () {
     var klassenSelect = '#klassenSelect';
     var wochenDisplay = '#wochenDisplay';
     var stundenplanContainer = '#stundenplanContainer';
+    var buttonZurueck = '#buttonLinks';
+    var buttonVorwaerts = '#buttonRechts';
     var jobIdLocalstorage = getLocalstorageJobId();
     var klassenIdLocalstorage = getLocalstorageKlassenId()
     var datum = moment();
@@ -17,6 +19,22 @@ $(function () {
 
         $(klassenSelect).on('change', function () {
             setLocalstorageKlassenId($("#klassenSelect :selected").val());
+            loadTable();
+        })
+
+        $(buttonZurueck).on('click', function () {
+            datum = moment(datum).subtract(1, 'w');
+            datumWoche = moment(datum).format('WW-GGGG');
+
+            $(wochenDisplay).text(moment(datum).format('WW-GGGG'));
+            loadTable();
+        })
+
+        $(buttonVorwaerts).on('click', function () {
+            datum = moment(datum).add(1, 'w');
+            datumWoche = moment(datum).format('WW-GGGG');
+
+            $(wochenDisplay).text(moment(datum).format('WW-GGGG'));
             loadTable();
         })
     }
@@ -76,7 +94,6 @@ $(function () {
                         '<thead><tr><th scope="col">Datum</th><th scope="col">Tag</th><th scope="col">Von</th><th scope="col">Bis</th><th scope="col">Lehrer</th><th scope="col">Fach</th><th scope="col">Raum</th></tr></thead>'
                     );
                     $.each(data, function (i, objectStundenplan) {
-                        console.log("uf2");
                         $(stundenplanContainer).append(
                             '<tr>' +
                             '<th scope="row">' +
