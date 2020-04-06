@@ -22,8 +22,10 @@ $(function () {
         })
 
         $(klassenSelect).on('change', function () {
-            setLocalstorageKlassenId($("#klassenSelect :selected").val());
-            loadTable();
+            if ($("#klassenSelect :selected").val() != "Wählen Sie Ihren Beruf") {
+                setLocalstorageKlassenId($("#klassenSelect :selected").val());
+                loadTable();
+            }
         })
 
         $(buttonZurueck).on('click', function () {
@@ -51,7 +53,7 @@ $(function () {
             .done(function (data) {
                 $(jobSelect)
                     .empty()
-                    .append('<option value="">Wählen Sie Ihren Beruf</option>');
+                    .append('<option value="0">Wählen Sie Ihren Beruf</option>');
                 $.each(data, function (i, jobSelector) {
                     if (jobSelector.beruf_name != 1) {
                         $('<option value="' + jobSelector.beruf_id + '">' + jobSelector.beruf_name + '</option>').appendTo($(jobSelect));
@@ -65,86 +67,106 @@ $(function () {
     }
 
     function loadKlassenSelect() {
-        $(klassenSelect).show();
-        var jobID = $("#jobSelect :selected").val();
-        $.getJSON('https://sandbox.gibm.ch/klassen.php?beruf_id=' + jobID)
-            .fail(function () {
-                alert("Verbindung zum Server fehlgeschlagen!");
-            })
-            .done(function (data) {
-                $(klassenSelect)
-                    .empty()
-                    .append('<option>Wählen Sie Ihre Klasse</option>')
-                $.each(data, function (i, klassenSelector) {
-                    $('<option value="' + klassenSelector.klasse_id + '">' + klassenSelector.klasse_longname + '</option>').appendTo($(klassenSelect));
+        if ($("#jobSelect :selected").val() == 0) {
+            $(klassenSelect).hide();
+            $(informationsMeldung).removeClass("d-flex");
+            $(wochenAuswahl).removeClass("d-flex");
+            $(informationsMeldung).hide();
+            $(wochenAuswahl).hide();
+            $(stundenplanContainer).empty();
+        } else {
+            $(klassenSelect).show();
+            var jobID = $("#jobSelect :selected").val();
+            $.getJSON('https://sandbox.gibm.ch/klassen.php?beruf_id=' + jobID)
+                .fail(function () {
+                    alert("Verbindung zum Server fehlgeschlagen!");
                 })
-                if (klassenIdLocalstorage != null && klassenIdLocalstorage != "") {
-                    $(klassenSelect + " option[value='" + klassenIdLocalstorage + "']").attr("selected", 'true');
-                    loadTable();
-                }
-            });
+                .done(function (data) {
+                    $(klassenSelect)
+                        .empty()
+                        .append('<option value="0">Wählen Sie Ihre Klasse</option>')
+                    $.each(data, function (i, klassenSelector) {
+                        $('<option value="' + klassenSelector.klasse_id + '">' + klassenSelector.klasse_longname + '</option>').appendTo($(klassenSelect));
+                    })
+                    if (klassenIdLocalstorage != null && klassenIdLocalstorage != "") {
+                        $(klassenSelect + " option[value='" + klassenIdLocalstorage + "']").attr("selected", 'true');
+                        loadTable();
+                    }
+                });
+        }
     }
 
     function loadTable() {
-        $(wochenAuswahl).show();
-        $(informationsMeldung).hide();
-        var klassenID = $("#klassenSelect :selected").val();
-        $.getJSON('http://sandbox.gibm.ch/tafel.php?klasse_id=' + klassenID + '&woche=' + datumWoche)
-            .fail(function () {
-                alert("Verbindung zum Server fehlgeschlagen!");
-            })
-            .done(function (data) {
-                $(stundenplanContainer).empty();
-                if (data.length != 0) {
-                    $(stundenplanContainer).append(
-                        '<thead><tr><th scope="col">Datum</th><th scope="col">Tag</th><th scope="col">Von</th><th scope="col">Bis</th><th scope="col">Lehrer</th><th scope="col">Fach</th><th scope="col">Raum</th></tr></thead>'
-                    );
-                    $.each(data, function (i, objectStundenplan) {
+        if ($("#klassenSelect :selected").val() == 0) {
+            $(informationsMeldung).removeClass("d-flex");
+            $(wochenAuswahl).removeClass("d-flex");
+            $(informationsMeldung).hide();
+            $(wochenAuswahl).hide();
+            $(stundenplanContainer).empty();
+        } else {
+            $(wochenAuswahl).addClass("d-flex");
+            $(wochenAuswahl).show();
+            $(informationsMeldung).removeClass("d-flex");
+            $(informationsMeldung).hide();
+            var klassenID = $("#klassenSelect :selected").val();
+            $.getJSON('http://sandbox.gibm.ch/tafel.php?klasse_id=' + klassenID + '&woche=' + datumWoche)
+                .fail(function () {
+                    alert("Verbindung zum Server fehlgeschlagen!");
+                })
+                .done(function (data) {
+                    $(stundenplanContainer).empty();
+                    if (data.length != 0) {
                         $(stundenplanContainer).append(
-                            '<tr>' +
-                            '<th scope="row">' +
-                            moment(objectStundenplan.tafel_datum).format('DD.MM.YYYY') +
-                            '</th>' +
-                            '<td>' +
-                            moment(objectStundenplan.tafel_datum)
-                                .day(objectStundenplan.tafel_wochentag)
-                                .format('dddd') +
-                            '</td>' +
-                            '<td>' +
-                            moment(objectStundenplan.tafel_von, 'HH:mm:ss').format('HH:mm') +
-                            '</td>' +
-                            '<td>' +
-                            moment(objectStundenplan.tafel_bis, 'HH:mm:ss').format('HH:mm') +
-                            '</td>' +
-                            '<td>' +
-                            objectStundenplan.tafel_lehrer +
-                            '</td>' +
-                            '<td>' +
-                            objectStundenplan.tafel_longfach +
-                            '</td>' +
-                            '<td>' +
-                            objectStundenplan.tafel_raum +
-                            '</td>' +
-                            '</tr>'
+                            '<thead><tr><th scope="col">Datum</th><th scope="col">Tag</th><th scope="col">Von</th><th scope="col">Bis</th><th scope="col">Lehrer</th><th scope="col">Fach</th><th scope="col">Raum</th></tr></thead>'
                         );
-                    });
-                } else {
-                    $(informationsMeldung).show();
-                }
-            });
+                        $.each(data, function (i, objectStundenplan) {
+                            $(stundenplanContainer).append(
+                                '<tr>' +
+                                '<th scope="row">' +
+                                moment(objectStundenplan.tafel_datum).format('DD.MM.YYYY') +
+                                '</th>' +
+                                '<td>' +
+                                moment(objectStundenplan.tafel_datum)
+                                    .day(objectStundenplan.tafel_wochentag)
+                                    .format('dddd') +
+                                '</td>' +
+                                '<td>' +
+                                moment(objectStundenplan.tafel_von, 'HH:mm:ss').format('HH:mm') +
+                                '</td>' +
+                                '<td>' +
+                                moment(objectStundenplan.tafel_bis, 'HH:mm:ss').format('HH:mm') +
+                                '</td>' +
+                                '<td>' +
+                                objectStundenplan.tafel_lehrer +
+                                '</td>' +
+                                '<td>' +
+                                objectStundenplan.tafel_longfach +
+                                '</td>' +
+                                '<td>' +
+                                objectStundenplan.tafel_raum +
+                                '</td>' +
+                                '</tr>'
+                            );
+                        });
+                    } else {
+                        $(informationsMeldung).addClass("d-flex");
+                        $(informationsMeldung).show();
+                    }
+                });
+        }
     }
 
 
     function startApplication() {
         $(klassenSelect).hide();
+        $(informationsMeldung).removeClass("d-flex");
+        $(wochenAuswahl).removeClass("d-flex");
         $(informationsMeldung).hide();
         $(wochenAuswahl).hide();
 
         $(wochenDisplay).text(datumWoche);
 
         addListeners();
-        console.log(jobIdLocalstorage);
-        console.log(klassenIdLocalstorage);
         loadJobSelect();
 
     }
