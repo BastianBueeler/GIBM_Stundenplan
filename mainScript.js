@@ -45,6 +45,15 @@ $(function () {
         })
     }
 
+    function doAnimation(element) {
+        $(element).animate({
+            opacity: '0.2'
+        });
+        $(element).animate({
+            opacity: '1'
+        });
+    }
+
     function loadJobSelect() {
         $.getJSON('https://sandbox.gibm.ch/berufe.php')
             .fail(function () {
@@ -148,9 +157,11 @@ $(function () {
                                 '</tr>'
                             );
                         });
+                        doAnimation(stundenplanContainer);
                     } else {
                         $(informationsMeldung).addClass("d-flex");
                         $(informationsMeldung).show();
+                        doAnimation(informationsMeldung);
                     }
                 });
         }
