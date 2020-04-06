@@ -13,7 +13,7 @@
 <body>
   <div class="jumbotron jumbotron-fluid display-sm-2">
     <div class="titleContainer">
-      <p class="m-4 text-black font-weight-bold h2"> GIBM Stundenplan</p>
+      <p class="m-4 text-black font-weight-bold h2">GIBM Stundenplan</p>
       <p class="m-4 lead text-black">Wähle einen Job und eine Klasse</p>
     </div>
   </div>
@@ -22,7 +22,7 @@
     <select class="form-control mt-3" id="jobSelect" title="Beruf"></select>
     <select class="form-control mt-3" id="klassenSelect" title="Klasse"></select>
     <br>
-    <div class='d-flex justify-content-center ml-auto' id="calenderWeekSelection">
+    <div class='d-flex justify-content-center ml-auto' id="wochenAuswahl">
       <button type='button' class='btn border text-secondary' id="buttonLinks">
         <i class='fas fa-chevron-left'></i>
       </button>
@@ -35,6 +35,9 @@
     <div class="table-responsive">
       <table class="table" id="stundenplanContainer">
       </table>
+    </div>
+    <div class="d-flex justify-content-center ml-auto" id="informationsMeldung">
+      <p class="m-4 text-black font-weight-bold h3">Keine Daten in dieser Woche gefunden.</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>

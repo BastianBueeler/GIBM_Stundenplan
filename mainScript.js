@@ -6,6 +6,8 @@ $(function () {
     var stundenplanContainer = '#stundenplanContainer';
     var buttonZurueck = '#buttonLinks';
     var buttonVorwaerts = '#buttonRechts';
+    var informationsMeldung = '#informationsMeldung';
+    var wochenAuswahl = '#wochenAuswahl';
     var jobIdLocalstorage = getLocalstorageJobId();
     var klassenIdLocalstorage = getLocalstorageKlassenId()
     var datum = moment();
@@ -13,8 +15,10 @@ $(function () {
 
     function addListeners() {
         $(jobSelect).on('change', function () {
-            loadKlassenSelect();
-            setLocalstorageJobId($("#jobSelect :selected").val());
+            if ($("#jobSelect :selected").val() != "Wählen Sie Ihren Beruf") {
+                loadKlassenSelect();
+                setLocalstorageJobId($("#jobSelect :selected").val());
+            }
         })
 
         $(klassenSelect).on('change', function () {
@@ -53,7 +57,7 @@ $(function () {
                         $('<option value="' + jobSelector.beruf_id + '">' + jobSelector.beruf_name + '</option>').appendTo($(jobSelect));
                     }
                 })
-                if (jobIdLocalstorage != null) {
+                if (jobIdLocalstorage != null && jobIdLocalstorage != "") {
                     $(jobSelect + " option[value='" + jobIdLocalstorage + "']").attr("selected", 'true');
                     loadKlassenSelect();
                 }
@@ -74,7 +78,7 @@ $(function () {
                 $.each(data, function (i, klassenSelector) {
                     $('<option value="' + klassenSelector.klasse_id + '">' + klassenSelector.klasse_longname + '</option>').appendTo($(klassenSelect));
                 })
-                if (klassenIdLocalstorage != null) {
+                if (klassenIdLocalstorage != null && klassenIdLocalstorage != "") {
                     $(klassenSelect + " option[value='" + klassenIdLocalstorage + "']").attr("selected", 'true');
                     loadTable();
                 }
@@ -82,6 +86,8 @@ $(function () {
     }
 
     function loadTable() {
+        $(wochenAuswahl).show();
+        $(informationsMeldung).hide();
         var klassenID = $("#klassenSelect :selected").val();
         $.getJSON('http://sandbox.gibm.ch/tafel.php?klasse_id=' + klassenID + '&woche=' + datumWoche)
             .fail(function () {
@@ -122,6 +128,8 @@ $(function () {
                             '</tr>'
                         );
                     });
+                } else {
+                    $(informationsMeldung).show();
                 }
             });
     }
@@ -129,10 +137,14 @@ $(function () {
 
     function startApplication() {
         $(klassenSelect).hide();
+        $(informationsMeldung).hide();
+        $(wochenAuswahl).hide();
 
         $(wochenDisplay).text(datumWoche);
 
         addListeners();
+        console.log(jobIdLocalstorage);
+        console.log(klassenIdLocalstorage);
         loadJobSelect();
 
     }
