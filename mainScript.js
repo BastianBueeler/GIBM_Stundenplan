@@ -24,6 +24,7 @@ $(function () {
             //Ueberpruefung auf Inhalt von Jobselect und danach loadKlassenSelect aufrufen, sowie Wert in Localstorage speichern.
             if ($("#jobSelect :selected").val() != "Wählen Sie Ihren Beruf") {
                 loadKlassenSelect();
+                doAnimation(klassenSelect);
                 setLocalstorageJobId($("#jobSelect :selected").val());
             }
         })
