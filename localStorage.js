@@ -3,7 +3,7 @@ function setLocalstorageJobId(jobId) {
     localStorage.setItem("jobId", jobId);
 }
 
-//Gibt den Wert der jobId, welcher im LocalStorage ist, zurueck
+//Gibt den Wert der jobId, welcher im LocalStorage ist, zurueck 
 function getLocalstorageJobId() {
     return localStorage.getItem("jobId");
 }
